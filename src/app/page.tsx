@@ -1,8 +1,8 @@
 "use client";
 
+import { MoonCard } from "@/components/moon";
 import { ProverbsCard } from "@/components/proverbs";
 import { WeatherCard } from "@/components/weather";
-import { MoonCard } from "@/components/moon";
 import { AgentState } from "@/lib/types";
 import {
   useCoAgent,
@@ -38,6 +38,7 @@ export default function CopilotKitPage() {
       }
     >
       <CopilotSidebar
+        defaultOpen={true}
         disableSystemMessage={true}
         clickOutsideToClose={false}
         labels={{
