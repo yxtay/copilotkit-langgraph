@@ -2,8 +2,11 @@
 
 It defines the workflow graph, state, tools, nodes and edges.
 """
+import asyncio
+from typing import TypedDict
 
 from copilotkit import CopilotKitState
+from copilotkit.langgraph import copilotkit_emit_state
 from langchain.tools import tool
 from langchain_core.messages import BaseMessage, SystemMessage
 from langchain_core.runnables import RunnableConfig
@@ -13,9 +16,14 @@ from langgraph.prebuilt import ToolNode
 from langgraph.types import Command
 
 
+class Searches(TypedDict):
+    query: str
+    done: bool
+
+
 class AgentState(CopilotKitState):
     proverbs: list[str]
-    # your_custom_agent_state: str = ""
+    searches: list[Searches]
 
 
 @tool
@@ -35,12 +43,21 @@ async def chat_node(state: AgentState, config: RunnableConfig) -> Command[str]:
 
     # 2. Bind the tools to the model
     model_with_tools = model.bind_tools(
-        [
-            *state.get("copilotkit", {}).get("actions", []),
-            *backend_tools,
-        ],
+        [*state.get("copilotkit", {}).get("actions", []), *backend_tools],
         parallel_tool_calls=False,
     )
+
+    # We can call copilotkit_emit_state to emit updated state
+    # before a node finishes
+    await copilotkit_emit_state(config, state)
+
+    # Simulate state updates
+    for search in state["searches"]:
+        await asyncio.sleep(1)
+        search["done"] = True
+
+        # We can also emit updates in a loop to simulate progress
+        await copilotkit_emit_state(config, state)
 
     # 3. Define the system message by which the chat model will be run
     system_message = SystemMessage(
@@ -49,30 +66,16 @@ async def chat_node(state: AgentState, config: RunnableConfig) -> Command[str]:
 
     # 4. Run the model to generate a response
     response = await model_with_tools.ainvoke(
-        [
-            system_message,
-            *state["messages"],
-        ],
-        config,
+        [system_message, *state["messages"]], config
     )
 
     # only route to tool node if tool is not in the tools list
     if route_to_tool_node(response):
         print("routing to tool node")
-        return Command(
-            goto="tool_node",
-            update={
-                "messages": [response],
-            },
-        )
+        return Command(goto="tool_node", update={"messages": [response]})
 
     # 5. We've handled all tool calls, so we can end the graph.
-    return Command(
-        goto=END,
-        update={
-            "messages": [response],
-        },
-    )
+    return Command(goto=END, update={"messages": [response]})
 
 
 def route_to_tool_node(response: BaseMessage):

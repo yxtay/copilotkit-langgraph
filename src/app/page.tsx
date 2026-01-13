@@ -6,6 +6,8 @@ import { WeatherCard } from "@/components/weather";
 import { AgentState } from "@/lib/types";
 import {
   useCoAgent,
+  useCoAgentStateRender,
+  useDefaultTool,
   useFrontendTool,
   useHumanInTheLoop,
   useRenderToolCall,
@@ -88,6 +90,7 @@ function YourMainContent({ themeColor }: { themeColor: string }) {
       proverbs: [
         "CopilotKit may be new, but its the best thing since sliced bread.",
       ],
+      searches: [],
     },
   });
 
@@ -137,6 +140,63 @@ function YourMainContent({ themeColor }: { themeColor: string }) {
     [themeColor]
   );
 
+  useFrontendTool({
+    name: "sayHello",
+    description: "Say hello to the user",
+    parameters: [
+      {
+        name: "name",
+        type: "string",
+        description: "The name of the user to say hello to",
+        required: true,
+      },
+    ],
+    handler({ name }) {
+      // Handler returns the result of the tool call
+      return { currentURLPath: window.location.href, userName: name };
+    },
+    render: ({ args }) => {
+      // Renders UI based on the data of the tool call
+      return (
+        <div>
+          <h1>Hello, {args.name}!</h1>
+          <h1>You're currently on {window.location.href}</h1>
+        </div>
+      );
+    },
+  });
+
+  // styles omitted for brevity
+  useCoAgentStateRender<AgentState>({
+    name: "sample_agent", // the name the agent is served as
+    render: ({ state }) => (
+      <div>
+        {state.searches?.map((search, index) => (
+          <div key={index}>
+            {search.done ? "✅" : "❌"} {search.query}
+            {search.done ? "" : "..."}
+          </div>
+        ))}
+      </div>
+    ),
+  });
+
+  useDefaultTool({
+    render: ({ name, args, status, result }) => {
+      return (
+        <div style={{ color: "black" }}>
+          <span>
+            {status === "complete" ? "✓" : "⏳"}
+            {name}
+          </span>
+          {status === "complete" && result && (
+            <pre>{JSON.stringify(result, null, 2)}</pre>
+          )}
+        </div>
+      );
+    },
+  });
+
   return (
     <div
       style={{ backgroundColor: themeColor }}
@@ -164,7 +224,7 @@ function AgentDashboard() {
             />
             <span>{agent.isRunning ? "Running" : "Idle"}</span>
           </div>
-          <div>Thread: {agent.threadId}</div>
+          {/* <div>Thread: {agent.threadId}</div> */}
           <div>Messages: {agent.messages.length}</div>
         </div>
       </div>
@@ -189,7 +249,7 @@ function AgentDashboard() {
               <div className="font-semibold text-sm mb-1">
                 {msg.role === "user" ? "You" : "Agent"}
               </div>
-              <div>{JSON.stringify(msg.content)}</div>
+              <div>{msg.content}</div>
             </div>
           ))}
         </div>
