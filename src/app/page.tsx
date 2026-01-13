@@ -188,7 +188,7 @@ function AgentDashboard() {
               <div className="font-semibold text-sm mb-1">
                 {msg.role === "user" ? "You" : "Agent"}
               </div>
-              <div>{msg.content}</div>
+              <div>{JSON.stringify(msg.content)}</div>
             </div>
           ))}
         </div>
