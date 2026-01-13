@@ -1,9 +1,7 @@
-"""
-This is the main entry point for the agent.
+"""The main entry point for the agent.
+
 It defines the workflow graph, state, tools, nodes and edges.
 """
-
-from typing import List
 
 from copilotkit import CopilotKitState
 from langchain.tools import tool
@@ -16,15 +14,13 @@ from langgraph.types import Command
 
 
 class AgentState(CopilotKitState):
-    proverbs: List[str]
+    proverbs: list[str]
     # your_custom_agent_state: str = ""
 
 
 @tool
 def get_weather(location: str):
-    """
-    Get the weather for a given location.
-    """
+    """Get the weather for a given location."""
     return f"The weather for {location} is 70 degrees."
 
 
@@ -80,9 +76,7 @@ async def chat_node(state: AgentState, config: RunnableConfig) -> Command[str]:
 
 
 def route_to_tool_node(response: BaseMessage):
-    """
-    Route to tool node if any tool call in the response matches a backend tool name.
-    """
+    """Route to tool node if any tool call in the response matches a backend tool name."""
     tool_calls = getattr(response, "tool_calls", None)
     if not tool_calls:
         return False

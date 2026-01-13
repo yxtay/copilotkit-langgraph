@@ -143,6 +143,7 @@ function YourMainContent({ themeColor }: { themeColor: string }) {
       className="h-screen flex justify-center items-center flex-col transition-colors duration-300"
     >
       <ProverbsCard state={state} setState={setState} />
+      <AgentDashboard />
     </div>
   );
 }
@@ -152,7 +153,7 @@ function AgentDashboard() {
   return (
     <div className="p-8 max-w-4xl mx-auto space-y-6">
       {/* Status */}
-      <div className="p-6 bg-white rounded-lg shadow">
+      <div className="p-6 rounded-lg shadow">
         <h2 className="text-xl font-bold mb-4">Agent Status</h2>
         <div className="space-y-2">
           <div className="flex items-center gap-2">
@@ -168,21 +169,21 @@ function AgentDashboard() {
         </div>
       </div>
       {/* State */}
-      <div className="p-6 bg-white rounded-lg shadow">
+      <div className="p-6 rounded-lg shadow">
         <h2 className="text-xl font-bold mb-4">Agent State</h2>
-        <pre className="bg-gray-50 p-4 rounded text-sm overflow-auto">
+        <pre className="p-4 rounded text-sm overflow-auto">
           {JSON.stringify(agent.state, null, 2)}
         </pre>
       </div>
       {/* Messages */}
-      <div className="p-6 bg-white rounded-lg shadow">
+      <div className="p-6 rounded-lg shadow">
         <h2 className="text-xl font-bold mb-4">Conversation</h2>
         <div className="space-y-3">
           {agent.messages.map((msg) => (
             <div
               key={msg.id}
               className={`p-3 rounded-lg ${
-                msg.role === "user" ? "bg-blue-50 ml-8" : "bg-gray-50 mr-8"
+                msg.role === "user" ? "ml-8" : "mr-8"
               }`}
             >
               <div className="font-semibold text-sm mb-1">
