@@ -13,7 +13,7 @@ from langchain_core.runnables import RunnableConfig
 from langchain_openai import ChatOpenAI
 from langgraph.graph import END, StateGraph
 from langgraph.prebuilt import ToolNode
-from langgraph.types import Command
+from langgraph.types import Command, interrupt
 
 
 class Searches(TypedDict):
@@ -22,6 +22,7 @@ class Searches(TypedDict):
 
 
 class AgentState(CopilotKitState):
+    agent_name: str
     proverbs: list[str]
     searches: list[Searches]
 
@@ -38,15 +39,6 @@ backend_tool_names = [tool.name for tool in backend_tools]
 
 
 async def chat_node(state: AgentState, config: RunnableConfig) -> Command[str]:
-    # 1. Define the model
-    model = ChatOpenAI(model="gpt-4.1-mini")
-
-    # 2. Bind the tools to the model
-    model_with_tools = model.bind_tools(
-        [*state.get("copilotkit", {}).get("actions", []), *backend_tools],
-        parallel_tool_calls=False,
-    )
-
     # We can call copilotkit_emit_state to emit updated state
     # before a node finishes
     await copilotkit_emit_state(config, state)
@@ -58,6 +50,21 @@ async def chat_node(state: AgentState, config: RunnableConfig) -> Command[str]:
 
         # We can also emit updates in a loop to simulate progress
         await copilotkit_emit_state(config, state)
+
+    # if not state.get("agent_name"):
+    #     # Interrupt and wait for the user to respond with a name
+    #     state["agent_name"] = interrupt(
+    #         "Before we start, what would you like to call me?"
+    #     )
+
+    # 1. Define the model
+    model = ChatOpenAI(model="gpt-5-mini")
+
+    # 2. Bind the tools to the model
+    model_with_tools = model.bind_tools(
+        [*state.get("copilotkit", {}).get("actions", []), *backend_tools],
+        parallel_tool_calls=False,
+    )
 
     # 3. Define the system message by which the chat model will be run
     system_message = SystemMessage(

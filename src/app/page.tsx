@@ -181,6 +181,27 @@ function YourMainContent({ themeColor }: { themeColor: string }) {
     ),
   });
 
+  // useLangGraphInterrupt({
+  //   render: ({ event, resolve }) => (
+  //     <div>
+  //       <p>{event.value}</p>
+  //       <form
+  //         onSubmit={(e) => {
+  //           e.preventDefault();
+  //           resolve((e.target as HTMLFormElement).response.value);
+  //         }}
+  //       >
+  //         <input
+  //           type="text"
+  //           name="response"
+  //           placeholder="Enter your response"
+  //         />
+  //         <button type="submit">Submit</button>
+  //       </form>
+  //     </div>
+  //   ),
+  // });
+
   useDefaultTool({
     render: ({ name, args, status, result }) => {
       return (
