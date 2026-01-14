@@ -10,6 +10,7 @@ import {
   useDefaultTool,
   useFrontendTool,
   useHumanInTheLoop,
+  useLangGraphInterrupt,
   useRenderToolCall,
 } from "@copilotkit/react-core";
 import { useAgent } from "@copilotkit/react-core/v2";
@@ -90,7 +91,6 @@ function YourMainContent({ themeColor }: { themeColor: string }) {
       proverbs: [
         "CopilotKit may be new, but its the best thing since sliced bread.",
       ],
-      searches: [],
     },
   });
 
@@ -181,26 +181,26 @@ function YourMainContent({ themeColor }: { themeColor: string }) {
     ),
   });
 
-  // useLangGraphInterrupt({
-  //   render: ({ event, resolve }) => (
-  //     <div>
-  //       <p>{event.value}</p>
-  //       <form
-  //         onSubmit={(e) => {
-  //           e.preventDefault();
-  //           resolve((e.target as HTMLFormElement).response.value);
-  //         }}
-  //       >
-  //         <input
-  //           type="text"
-  //           name="response"
-  //           placeholder="Enter your response"
-  //         />
-  //         <button type="submit">Submit</button>
-  //       </form>
-  //     </div>
-  //   ),
-  // });
+  useLangGraphInterrupt({
+    render: ({ event, resolve }) => (
+      <div>
+        <p>{event.value}</p>
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            resolve((e.target as HTMLFormElement).response.value);
+          }}
+        >
+          <input
+            type="text"
+            name="response"
+            placeholder="Enter your response"
+          />
+          <button type="submit">Submit</button>
+        </form>
+      </div>
+    ),
+  });
 
   useDefaultTool({
     render: ({ name, args, status, result }) => {

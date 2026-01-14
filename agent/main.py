@@ -39,6 +39,9 @@ backend_tool_names = [tool.name for tool in backend_tools]
 
 
 async def chat_node(state: AgentState, config: RunnableConfig) -> Command[str]:
+    if "searches" not in state:
+        state["searches"] = []
+
     # We can call copilotkit_emit_state to emit updated state
     # before a node finishes
     await copilotkit_emit_state(config, state)
